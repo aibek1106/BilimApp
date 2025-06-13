@@ -8,7 +8,7 @@
         <version>3.5.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>kg</groupId>
+    <groupId>kg.bilim_app</groupId>
     <artifactId>bilim-app</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>

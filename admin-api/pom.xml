@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>kg</groupId>
+        <groupId>kg.bilim_app</groupId>
         <artifactId>bilim-app</artifactId>
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
@@ -11,7 +11,7 @@
     <artifactId>admin-api</artifactId>
     <dependencies>
         <dependency>
-            <groupId>kg</groupId>
+            <groupId>kg.bilim_app</groupId>
             <artifactId>ort</artifactId>
             <version>${project.version}</version>
         </dependency>

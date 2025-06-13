@@ -9,3 +9,6 @@ This project contains a Spring Boot application. The initial domain model includ
 - **Question** – belongs to a subgroup and stores question text.
 - **Answer** – possible answer related to a question.
 - **AppUser** – Telegram mini app user information.
+- **Region** – administrative area with Kyrgyz and Russian names.
+- **City** – belongs to a region.
+- **School** – belongs to a city and contains users.

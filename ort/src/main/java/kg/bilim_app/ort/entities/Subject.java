@@ -21,6 +21,7 @@ public class Subject extends BaseEntity {
 
     private SubjectType type;
 
+    @Enumerated(EnumType.STRING)
     private Language language;
 
     @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL, orphanRemoval = true)

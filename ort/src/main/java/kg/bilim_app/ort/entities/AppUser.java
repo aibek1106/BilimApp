@@ -1,6 +1,7 @@
 package kg.bilim_app.ort.entities;
 
 import jakarta.persistence.*;
+import kg.bilim_app.common.enums.Language;
 import kg.bilim_app.common.models.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,4 +19,7 @@ public class AppUser extends BaseEntity {
 
     @Nationalized
     private String lastName;
+
+    @Enumerated(EnumType.STRING)
+    private Language language;
 }

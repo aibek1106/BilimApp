@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/mobile/subjects")
+@RequestMapping("/mobile/subjects")
 @RequiredArgsConstructor
 public class SubjectController {
 

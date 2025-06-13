@@ -1,19 +1,20 @@
-package kg.bilim_app.model;
+package kg.bilim_app.entities;
 
 import jakarta.persistence.*;
+import kg.bilim_app.models.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.hibernate.annotations.Nationalized;
 
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
-public class SubjectSubgroup {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class SubjectSubgroup extends BaseEntity {
 
+    @Nationalized
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -1,20 +1,24 @@
-package kg.bilim_app.model;
+package kg.bilim_app.entities;
 
 import jakarta.persistence.*;
+import kg.bilim_app.enums.SubjectType;
+import kg.bilim_app.models.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.hibernate.annotations.Nationalized;
 
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @Entity
-public class Subject {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Subject extends BaseEntity {
 
+    @Nationalized
     private String name;
+
+    private SubjectType type;
 
     @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude

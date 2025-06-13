@@ -1,6 +1,7 @@
 package kg.bilim_app.ort.entities;
 
 import jakarta.persistence.*;
+import kg.bilim_app.common.enums.Language;
 import kg.bilim_app.common.enums.SubjectType;
 import kg.bilim_app.common.models.BaseEntity;
 import lombok.Data;
@@ -19,6 +20,8 @@ public class Subject extends BaseEntity {
     private String name;
 
     private SubjectType type;
+
+    private Language language;
 
     @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude

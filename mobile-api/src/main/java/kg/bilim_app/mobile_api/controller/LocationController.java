@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
 
 import java.util.List;
 
@@ -19,16 +20,19 @@ public class LocationController {
 
     private final LocationService service;
 
+    @Operation(summary = "Get list of regions")
     @GetMapping("/regions")
     public List<Region> getRegions() {
         return service.getRegions();
     }
 
+    @Operation(summary = "Get cities by region id")
     @GetMapping("/cities/{regionId}")
     public List<City> getCities(@PathVariable Long regionId) {
         return service.getCities(regionId);
     }
 
+    @Operation(summary = "Get schools by city id")
     @GetMapping("/schools/{cityId}")
     public List<School> getSchools(@PathVariable Long cityId) {
         return service.getSchools(cityId);

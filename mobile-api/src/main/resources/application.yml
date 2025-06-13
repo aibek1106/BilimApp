@@ -21,3 +21,10 @@ jwt:
   expiration: 3600
 server:
   port: 8090
+
+springdoc:
+  swagger-ui:
+    path: /api/mobile/swagger-ui/index.html
+    config-url: /api/mobile/v3/api-docs/swagger-config
+  api-docs:
+    path: /api/mobile/v3/api-docs

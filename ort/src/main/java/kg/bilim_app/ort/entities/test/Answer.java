@@ -16,6 +16,8 @@ public class Answer extends BaseEntity {
     @Column(columnDefinition = "text")
     private String text;
 
+    private Boolean correct;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id")
     @ToString.Exclude

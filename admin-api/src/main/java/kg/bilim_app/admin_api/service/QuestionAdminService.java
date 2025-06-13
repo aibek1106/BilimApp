@@ -1,9 +1,9 @@
 package kg.bilim_app.admin_api.service;
 
 import kg.bilim_app.admin_api.dto.NewQuestionRequest;
-import kg.bilim_app.ort.entities.Answer;
-import kg.bilim_app.ort.entities.Question;
-import kg.bilim_app.ort.entities.SubjectSubgroup;
+import kg.bilim_app.ort.entities.test.Answer;
+import kg.bilim_app.ort.entities.test.Question;
+import kg.bilim_app.ort.entities.test.SubjectSubgroup;
 import kg.bilim_app.ort.repositories.QuestionRepository;
 import kg.bilim_app.ort.repositories.SubjectSubgroupRepository;
 import lombok.RequiredArgsConstructor;

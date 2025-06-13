@@ -1,4 +1,4 @@
-package kg.bilim_app.ort.entities;
+package kg.bilim_app.ort.entities.test;
 
 import jakarta.persistence.*;
 import kg.bilim_app.common.enums.Language;

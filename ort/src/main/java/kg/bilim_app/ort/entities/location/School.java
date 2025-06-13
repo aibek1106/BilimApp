@@ -1,7 +1,8 @@
-package kg.bilim_app.ort.entities;
+package kg.bilim_app.ort.entities.location;
 
 import jakarta.persistence.*;
 import kg.bilim_app.common.models.BaseEntity;
+import kg.bilim_app.ort.entities.AppUser;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -13,10 +14,11 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(indexes = {
+        @Index(columnList = "city_id"),
         @Index(columnList = "name_ru"),
         @Index(columnList = "name_ky")
 })
-public class Region extends BaseEntity {
+public class School extends BaseEntity {
 
     @Nationalized
     @Column(name = "name_ru")
@@ -26,8 +28,14 @@ public class Region extends BaseEntity {
     @Column(name = "name_ky")
     private String nameKy;
 
-    @OneToMany(mappedBy = "region", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "city_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private List<City> cities;
+    private City city;
+
+    @OneToMany(mappedBy = "school")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<AppUser> users;
 }

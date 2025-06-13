@@ -1,4 +1,4 @@
-package kg.bilim_app.ort.entities;
+package kg.bilim_app.ort.entities.test;
 
 import jakarta.persistence.*;
 import kg.bilim_app.common.models.BaseEntity;
@@ -7,18 +7,25 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.hibernate.annotations.Nationalized;
 
+import java.util.List;
+
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Entity
-public class Answer extends BaseEntity {
+public class Question extends BaseEntity {
 
     @Nationalized
     @Column(columnDefinition = "text")
     private String text;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "question_id")
+    @JoinColumn(name = "subgroup_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private Question question;
+    private SubjectSubgroup subgroup;
+
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<Answer> answers;
 }

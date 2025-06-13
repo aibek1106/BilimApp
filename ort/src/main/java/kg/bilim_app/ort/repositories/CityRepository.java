@@ -1,6 +1,6 @@
 package kg.bilim_app.ort.repositories;
 
-import kg.bilim_app.ort.entities.City;
+import kg.bilim_app.ort.entities.location.City;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

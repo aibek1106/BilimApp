@@ -1,9 +1,9 @@
 package kg.bilim_app.mobile_api.controller;
 
 import kg.bilim_app.mobile_api.service.LocationService;
-import kg.bilim_app.ort.entities.City;
-import kg.bilim_app.ort.entities.Region;
-import kg.bilim_app.ort.entities.School;
+import kg.bilim_app.ort.entities.location.City;
+import kg.bilim_app.ort.entities.location.Region;
+import kg.bilim_app.ort.entities.location.School;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

@@ -3,6 +3,7 @@ package kg.bilim_app.ort.entities;
 import jakarta.persistence.*;
 import kg.bilim_app.common.enums.Language;
 import kg.bilim_app.common.models.BaseEntity;
+import kg.bilim_app.ort.entities.location.School;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.Nationalized;

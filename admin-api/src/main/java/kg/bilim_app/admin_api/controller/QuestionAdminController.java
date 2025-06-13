@@ -2,7 +2,7 @@ package kg.bilim_app.admin_api.controller;
 
 import kg.bilim_app.admin_api.dto.NewQuestionRequest;
 import kg.bilim_app.admin_api.service.QuestionAdminService;
-import kg.bilim_app.ort.entities.Question;
+import kg.bilim_app.ort.entities.test.Question;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;

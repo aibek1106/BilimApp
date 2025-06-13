@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import java.util.List;
 
 @RestController
-@RequestMapping("/mobile/location")
+@RequestMapping("/location")
 @RequiredArgsConstructor
 public class LocationController {
 

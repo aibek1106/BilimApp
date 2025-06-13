@@ -1,6 +1,6 @@
-package kg.bilim_app.repositories;
+package kg.bilim_app.ort.repositories;
 
-import kg.bilim_app.entities.Answer;
+import kg.bilim_app.ort.entities.Answer;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AnswerRepository extends JpaRepository<Answer, Long> {

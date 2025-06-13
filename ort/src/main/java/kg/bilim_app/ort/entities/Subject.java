@@ -1,8 +1,8 @@
-package kg.bilim_app.entities;
+package kg.bilim_app.ort.entities;
 
 import jakarta.persistence.*;
-import kg.bilim_app.enums.SubjectType;
-import kg.bilim_app.models.BaseEntity;
+import kg.bilim_app.common.enums.SubjectType;
+import kg.bilim_app.common.models.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;

@@ -1,7 +1,7 @@
-package kg.bilim_app.entities;
+package kg.bilim_app.ort.entities;
 
 import jakarta.persistence.*;
-import kg.bilim_app.models.BaseEntity;
+import kg.bilim_app.common.models.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -12,20 +12,19 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Entity
-public class Question extends BaseEntity {
+public class SubjectSubgroup extends BaseEntity {
 
     @Nationalized
-    @Column(columnDefinition = "text")
-    private String text;
+    private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subgroup_id")
+    @JoinColumn(name = "subject_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private SubjectSubgroup subgroup;
+    private Subject subject;
 
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "subgroup", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private List<Answer> answers;
+    private List<Question> questions;
 }

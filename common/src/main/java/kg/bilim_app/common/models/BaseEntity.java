@@ -1,4 +1,4 @@
-package kg.bilim_app.models;
+package kg.bilim_app.common.models;
 
 import jakarta.persistence.*;
 import lombok.Getter;

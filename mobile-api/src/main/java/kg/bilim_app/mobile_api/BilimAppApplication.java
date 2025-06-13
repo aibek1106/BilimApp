@@ -1,4 +1,4 @@
-package kg.bilim_app;
+package kg.bilim_app.mobile_api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

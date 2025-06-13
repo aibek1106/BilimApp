@@ -12,3 +12,10 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+telegram:
+  bot-token: change_me
+
+jwt:
+  secret: change_me
+  expiration: 3600

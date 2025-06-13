@@ -3,6 +3,7 @@ package kg.bilim_app.mobile_api.controller;
 import kg.bilim_app.mobile_api.request.RegisterUserRequest;
 import kg.bilim_app.mobile_api.response.UserResponse;
 import kg.bilim_app.mobile_api.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,7 +17,7 @@ public class UserController {
 
     @Operation(summary = "Register new user")
     @PostMapping("/register")
-    public UserResponse register(@RequestBody RegisterUserRequest request) {
+    public UserResponse register(@Valid @RequestBody RegisterUserRequest request) {
         return service.registerUser(request);
     }
 

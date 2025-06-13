@@ -1,4 +1,8 @@
 package kg.bilim_app.mobile_api.request;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import kg.bilim_app.common.enums.Language;
 
 /**
@@ -10,9 +14,10 @@ import kg.bilim_app.common.enums.Language;
  * @param schoolId   identifier of the school
  * @param language   preferred language
  */
-public record RegisterUserRequest(Long telegramId,
-                                  String firstName,
-                                  String lastName,
-                                  Long schoolId,
-                                  Language language) {
+public record RegisterUserRequest(
+        @Schema(description = "Telegram identifier") @NotNull Long telegramId,
+        @Schema(description = "first name") @NotBlank String firstName,
+        @Schema(description = "last name") @NotBlank String lastName,
+        @Schema(description = "identifier of the school") @NotNull Long schoolId,
+        @Schema(description = "preferred language") @NotNull Language language) {
 }

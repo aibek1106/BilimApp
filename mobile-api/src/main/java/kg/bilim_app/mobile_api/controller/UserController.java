@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/mobile/users")
 @RequiredArgsConstructor
 public class UserController {
 

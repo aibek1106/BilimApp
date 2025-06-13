@@ -6,10 +6,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @EnableJpaAuditing
 @SpringBootApplication
-public class BilimAppApplication {
+public class MobileApiApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(BilimAppApplication.class, args);
+		SpringApplication.run(MobileApiApplication.class, args);
 	}
 
 }

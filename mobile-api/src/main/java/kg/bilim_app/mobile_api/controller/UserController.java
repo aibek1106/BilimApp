@@ -1,8 +1,8 @@
 package kg.bilim_app.mobile_api.controller;
 
-import kg.bilim_app.mobile_api.dto.RegisterUserRequest;
+import kg.bilim_app.mobile_api.request.RegisterUserRequest;
+import kg.bilim_app.mobile_api.response.UserResponse;
 import kg.bilim_app.mobile_api.service.UserService;
-import kg.bilim_app.ort.entities.AppUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,13 +16,13 @@ public class UserController {
 
     @Operation(summary = "Register new user")
     @PostMapping("/register")
-    public AppUser register(@RequestBody RegisterUserRequest request) {
+    public UserResponse register(@RequestBody RegisterUserRequest request) {
         return service.registerUser(request);
     }
 
     @Operation(summary = "Get user by telegram id")
     @GetMapping("/{telegramId}")
-    public AppUser getUser(@PathVariable Long telegramId) {
+    public UserResponse getUser(@PathVariable Long telegramId) {
         return service.getUser(telegramId);
     }
 

@@ -1,5 +1,6 @@
 package kg.bilim_app.mobile_api.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import kg.bilim_app.common.enums.Language;
 
 /**
@@ -12,10 +13,11 @@ import kg.bilim_app.common.enums.Language;
  * @param language   preferred language
  * @param schoolId   identifier of the user's school
  */
-public record UserResponse(Long id,
-                           Long telegramId,
-                           String firstName,
-                           String lastName,
-                           Language language,
-                           Long schoolId) {
+public record UserResponse(
+        @Schema(description = "identifier") Long id,
+        @Schema(description = "telegram identifier") Long telegramId,
+        @Schema(description = "first name") String firstName,
+        @Schema(description = "last name") String lastName,
+        @Schema(description = "preferred language") Language language,
+        @Schema(description = "identifier of the user's school") Long schoolId) {
 }

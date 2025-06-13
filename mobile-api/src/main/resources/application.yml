@@ -19,3 +19,5 @@ telegram:
 jwt:
   secret: change_me
   expiration: 3600
+server:
+  port: 8090

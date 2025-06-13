@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/admin/location")
+@RequestMapping("/api/admin/location")
 @RequiredArgsConstructor
 public class LocationAdminController {
 

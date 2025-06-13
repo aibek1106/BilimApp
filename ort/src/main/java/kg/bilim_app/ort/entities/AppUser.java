@@ -22,6 +22,8 @@ public class AppUser extends BaseEntity {
     @Nationalized
     private String lastName;
 
+    private String username;
+
     @Enumerated(EnumType.STRING)
     private Language language;
 

@@ -30,4 +30,4 @@ springdoc:
     path: /api/mobile/v3/api-docs
 
 app:
-  version: ${revision}
+  version: 0.0.1

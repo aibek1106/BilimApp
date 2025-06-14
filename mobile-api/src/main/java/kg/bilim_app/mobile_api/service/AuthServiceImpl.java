@@ -2,7 +2,6 @@ package kg.bilim_app.mobile_api.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
 import kg.bilim_app.mobile_api.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +14,8 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -29,77 +29,74 @@ public class AuthServiceImpl implements AuthService {
     @Value("${telegram.bot-token}")
     private String botToken;
 
-
-
     @Override
     public String authenticate(String initData) {
-        log.info("init data: {}", initData);
-        // 1) разбираем «сырые» пары ключ=значение, без декодирования значений
-        Map<String, String> raw = parseRaw(initData);
+        log.info("initData: {}", initData);
 
-        // 2) забираем и удаляем из map hash и signature
-        String expectedHash  = raw.remove("hash");
-        raw.remove("signature");
+        /* 1. разбираем initData один раз URL-decode, но
+              значения оставляем закодированными */
+        Map<String, String> params = parse(initData);
 
-        // 3) секретный ключ: HMAC-SHA256(botToken, key="WebAppData")
-        byte[] secret = hmac("WebAppData".getBytes(StandardCharsets.UTF_8),
-                botToken.getBytes(StandardCharsets.UTF_8));
+        /* 2. вытаскиваем hash, НО signature оставляем! */
+        String expectedHash = params.remove("hash");
 
-        // 4) строим data_check_string из оставшихся raw-параметров
-        String dataCheckString = raw.entrySet().stream()
+        /* 3. секрет:  secret = HMAC_SHA256(data = botToken, key = "WebAppData") */
+        byte[] secret = hmac(
+                botToken.getBytes(StandardCharsets.UTF_8),           // data
+                "WebAppData".getBytes(StandardCharsets.UTF_8));      // key
+
+        /* 4. data_check_string = все оставшиеся пары (вкл. signature) */
+        String dcs = params.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .map(e -> e.getKey() + "=" + e.getValue())
                 .collect(Collectors.joining("\n"));
 
-        // 5) считаем HMAC-SHA256(data_check_string, key=secret)
-        String calculated = bytesToHex(hmac(secret, dataCheckString.getBytes(StandardCharsets.UTF_8)));
+        /* 5. calculated = HMAC_SHA256(data_check_string, secret) */
+        String calculated = bytesToHex(
+                hmac(dcs.getBytes(StandardCharsets.UTF_8), secret));
 
-        log.info("Expected hash:   {}", expectedHash);
+        log.info("Expected hash: {}", expectedHash);
         log.info("Calculated hash: {}", calculated);
-        log.info("dataCheckString {}", dataCheckString);
+        log.info("dataCheckString:\n{}", dcs);
 
         if (!calculated.equals(expectedHash)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid init data");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid initData");
         }
 
-        // 6) теперь декодируем user и парсим JSON
-        String userJson = URLDecoder.decode(raw.get("user"), StandardCharsets.UTF_8);
+        /* 6. декодируем user для JSON-парсинга и выдаём JWT */
+        String userJson = URLDecoder.decode(params.get("user"), StandardCharsets.UTF_8);
         try {
             JsonNode user = mapper.readTree(userJson);
-            long id = user.get("id").asLong();
-            return jwtService.generateToken(id);
-        } catch (Exception ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user info");
+            long telegramId = user.get("id").asLong();
+            return jwtService.generateToken(telegramId);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user JSON");
         }
     }
 
-    /**
-     * Parses the initData string into raw key–value pairs.
-     * Telegram sends this value URL-encoded, so we need to decode
-     * the whole string once before splitting by '&'. The individual
-     * parameter values should remain encoded to correctly recreate
-     * the {@code data_check_string}.
-     */
-    private Map<String, String> parseRaw(String initData) {
-        String decoded = URLDecoder.decode(initData, StandardCharsets.UTF_8);
+    /* --- helpers -------------------------------------------------------- */
+
+    /** URL-decode всей строки, но значения сохраняем «сырыми» */
+    private Map<String, String> parse(String encoded) {
+        String decoded = URLDecoder.decode(encoded, StandardCharsets.UTF_8);
         Map<String, String> map = new HashMap<>();
         for (String pair : decoded.split("&")) {
             int idx = pair.indexOf('=');
-            if (idx >= 0) {
+            if (idx > 0) {
                 map.put(pair.substring(0, idx), pair.substring(idx + 1));
             }
         }
         return map;
     }
 
-    /** HMAC-SHA256 над data с ключом key */
-    private byte[] hmac(byte[] key, byte[] data) {
+    /** HMAC-SHA256: data → key (порядок как в Telegram) */
+    private byte[] hmac(byte[] data, byte[] key) {
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(new SecretKeySpec(key, "HmacSHA256"));
             return mac.doFinal(data);
         } catch (Exception e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("HMAC error", e);
         }
     }
 

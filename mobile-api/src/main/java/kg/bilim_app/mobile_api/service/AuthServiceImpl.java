@@ -2,13 +2,13 @@ package kg.bilim_app.mobile_api.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kg.bilim_app.mobile_api.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import kg.bilim_app.mobile_api.security.JwtService;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -31,50 +31,47 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String authenticate(String initData) {
+        Map<String, String> rawData = parseRaw(initData);
+        String expectedHash = rawData.remove("hash");
 
-        // 1. разбираем строку: одно URL-декодирование
-        Map<String, String> data = parse(initData);
-        String hash = data.remove("hash");
+        // Telegram HMAC: secret = HMAC_SHA256("WebAppData", SHA256(bot_token))
+        byte[] secret = hmac("WebAppData", sha256(botToken.getBytes(StandardCharsets.UTF_8)));
 
-        // 2. secret = HMAC_SHA256("WebAppData", sha256(botToken))
-        byte[] botTokenHash = sha256(botToken.getBytes(StandardCharsets.UTF_8));
-        byte[] secret = hmac("WebAppData", botTokenHash);
-
-        // 3. data_check_string
-        String dcs = data.entrySet().stream()
+        // Строим data_check_string из raw-данных (без URL-декодирования!)
+        String dataCheckString = rawData.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .map(e -> e.getKey() + "=" + e.getValue())
                 .collect(Collectors.joining("\n"));
 
-        // 4. вычисляем hash
-        String calc = bytesToHex(hmac(dcs, secret));
+        String calculatedHash = bytesToHex(hmac(dataCheckString, secret));
 
-        log.info("Expected: {}", hash);
-        log.info("Calculated: {}", calc);
+        log.info("Expected: {}", expectedHash);
+        log.info("Calculated: {}", calculatedHash);
 
-        if (!calc.equals(hash)) {
+        if (!calculatedHash.equals(expectedHash)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid init data");
         }
 
-        // 5. юзер-json нужно декодировать ещё раз, чтобы распарсить
-        String userJson = URLDecoder.decode(data.get("user"), StandardCharsets.UTF_8);
+        // Декодируем user только для JSON-десериализации
+        String userJsonRaw = rawData.get("user");
+        String userJson = URLDecoder.decode(userJsonRaw, StandardCharsets.UTF_8);
+
         try {
-            JsonNode node = mapper.readTree(userJson);
-            long id = node.get("id").asLong();
+            JsonNode user = mapper.readTree(userJson);
+            long id = user.get("id").asLong();
             return jwtService.generateToken(id);
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user info");
         }
     }
 
-    /* ---------- util ---------- */
-
-    private Map<String, String> parse(String initData) {
+    // Парсинг initData без декодирования значений
+    private Map<String, String> parseRaw(String initData) {
         Map<String, String> map = new HashMap<>();
         for (String pair : initData.split("&")) {
             String[] p = pair.split("=", 2);
             if (p.length == 2) {
-                map.put(p[0], URLDecoder.decode(p[1], StandardCharsets.UTF_8));
+                map.put(p[0], p[1]); // ❗️не декодируем!
             }
         }
         return map;
@@ -90,9 +87,9 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    private byte[] sha256(byte[] bytes) {
+    private byte[] sha256(byte[] input) {
         try {
-            return MessageDigest.getInstance("SHA-256").digest(bytes);
+            return MessageDigest.getInstance("SHA-256").digest(input);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }

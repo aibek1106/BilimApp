@@ -2,6 +2,7 @@ package kg.bilim_app.mobile_api.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import kg.bilim_app.mobile_api.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +29,11 @@ public class AuthServiceImpl implements AuthService {
     @Value("${telegram.bot-token}")
     private String botToken;
 
+
+
     @Override
     public String authenticate(String initData) {
+        log.info("init data: {}", initData);
         // 1) разбираем «сырые» пары ключ=значение, без декодирования значений
         Map<String, String> raw = parseRaw(initData);
 

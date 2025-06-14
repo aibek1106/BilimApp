@@ -31,6 +31,7 @@ public class UserServiceImpl implements UserService {
         user.setLastName(request.lastName());
         user.setLanguage(request.language());
         user.setSchool(school);
+        user.setUsername(request.username());
         AppUser saved = userRepository.save(user);
         return toResponse(saved);
     }

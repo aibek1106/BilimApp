@@ -17,7 +17,8 @@ import kg.bilim_app.common.enums.Language;
 public record RegisterUserRequest(
         @Schema(description = "Telegram identifier") @NotNull Long telegramId,
         @Schema(description = "first name") @NotBlank String firstName,
-        @Schema(description = "last name") @NotBlank String lastName,
+        @Schema(description = "last name") String lastName,
+        @Schema(description = "username") String username,
         @Schema(description = "identifier of the school") @NotNull Long schoolId,
         @Schema(description = "preferred language") @NotNull Language language) {
 }

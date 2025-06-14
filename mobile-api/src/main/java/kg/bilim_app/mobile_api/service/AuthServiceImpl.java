@@ -14,6 +14,7 @@ import kg.bilim_app.mobile_api.security.JwtService;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -49,6 +50,10 @@ public class AuthServiceImpl implements AuthService {
                 .map(e -> e.getKey() + "=" + e.getValue())
                 .collect(Collectors.joining("\n"));
         String calculated = bytesToHex(hmac(dataCheckString, secret));
+
+        log.info("Expected hash: {}", hash);
+        log.info("Calculated hash: {}", calculated);
+
         if (!calculated.equals(hash)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid init data");
         }
@@ -71,7 +76,7 @@ public class AuthServiceImpl implements AuthService {
             String[] p = pair.split("=", 2);
             if (p.length == 2) {
                 String key = p[0];
-                String value = java.net.URLDecoder.decode(p[1], StandardCharsets.UTF_8);
+                String value = URLDecoder.decode(URLDecoder.decode(p[1], StandardCharsets.UTF_8), StandardCharsets.UTF_8);
                 map.put(key, value);
             }
         }

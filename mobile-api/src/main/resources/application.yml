@@ -28,3 +28,6 @@ springdoc:
     config-url: /api/mobile/v3/api-docs/swagger-config
   api-docs:
     path: /api/mobile/v3/api-docs
+
+app:
+  version: ${revision}

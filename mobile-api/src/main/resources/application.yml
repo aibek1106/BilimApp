@@ -14,7 +14,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
 telegram:
-  bot-token: change_me
+  bot-token: ${BOT_TOKEN:change_me}
 
 jwt:
   secret: change_me

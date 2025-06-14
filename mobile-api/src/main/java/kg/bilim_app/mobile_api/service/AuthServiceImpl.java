@@ -73,13 +73,20 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
-    /** Разбирает строку «key1=val1&key2=val2…» без URL-decode значений */
+    /**
+     * Parses the initData string into raw key–value pairs.
+     * Telegram sends this value URL-encoded, so we need to decode
+     * the whole string once before splitting by '&'. The individual
+     * parameter values should remain encoded to correctly recreate
+     * the {@code data_check_string}.
+     */
     private Map<String, String> parseRaw(String initData) {
+        String decoded = URLDecoder.decode(initData, StandardCharsets.UTF_8);
         Map<String, String> map = new HashMap<>();
-        for (String pair : initData.split("&")) {
-            String[] p = pair.split("=", 2);
-            if (p.length == 2) {
-                map.put(p[0], p[1]);
+        for (String pair : decoded.split("&")) {
+            int idx = pair.indexOf('=');
+            if (idx >= 0) {
+                map.put(pair.substring(0, idx), pair.substring(idx + 1));
             }
         }
         return map;

@@ -14,7 +14,6 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,65 +30,63 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String authenticate(String initData) {
-        Map<String, String> rawData = parseRaw(initData);
-        String expectedHash = rawData.remove("hash");
+        // 1) разбираем «сырые» пары ключ=значение, без декодирования значений
+        Map<String, String> raw = parseRaw(initData);
 
-        // Telegram HMAC: secret = HMAC_SHA256("WebAppData", SHA256(bot_token))
-        byte[] secret = hmac("WebAppData", sha256(botToken.getBytes(StandardCharsets.UTF_8)));
+        // 2) забираем и удаляем из map hash и signature
+        String expectedHash  = raw.remove("hash");
+        raw.remove("signature");
 
-        // Строим data_check_string из raw-данных (без URL-декодирования!)
-        String dataCheckString = rawData.entrySet().stream()
+        // 3) секретный ключ: HMAC-SHA256(botToken, key="WebAppData")
+        byte[] secret = hmac("WebAppData".getBytes(StandardCharsets.UTF_8),
+                botToken.getBytes(StandardCharsets.UTF_8));
+
+        // 4) строим data_check_string из оставшихся raw-параметров
+        String dataCheckString = raw.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .map(e -> e.getKey() + "=" + e.getValue())
                 .collect(Collectors.joining("\n"));
 
-        String calculatedHash = bytesToHex(hmac(dataCheckString, secret));
+        // 5) считаем HMAC-SHA256(data_check_string, key=secret)
+        String calculated = bytesToHex(hmac(secret, dataCheckString.getBytes(StandardCharsets.UTF_8)));
 
-        log.info("Expected: {}", expectedHash);
-        log.info("Calculated: {}", calculatedHash);
+        log.info("Expected hash:   {}", expectedHash);
+        log.info("Calculated hash: {}", calculated);
+        log.info("dataCheckString {}", dataCheckString);
 
-        if (!calculatedHash.equals(expectedHash)) {
+        if (!calculated.equals(expectedHash)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid init data");
         }
 
-        // Декодируем user только для JSON-десериализации
-        String userJsonRaw = rawData.get("user");
-        String userJson = URLDecoder.decode(userJsonRaw, StandardCharsets.UTF_8);
-
+        // 6) теперь декодируем user и парсим JSON
+        String userJson = URLDecoder.decode(raw.get("user"), StandardCharsets.UTF_8);
         try {
             JsonNode user = mapper.readTree(userJson);
             long id = user.get("id").asLong();
             return jwtService.generateToken(id);
-        } catch (Exception e) {
+        } catch (Exception ex) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid user info");
         }
     }
 
-    // Парсинг initData без декодирования значений
+    /** Разбирает строку «key1=val1&key2=val2…» без URL-decode значений */
     private Map<String, String> parseRaw(String initData) {
         Map<String, String> map = new HashMap<>();
         for (String pair : initData.split("&")) {
             String[] p = pair.split("=", 2);
             if (p.length == 2) {
-                map.put(p[0], p[1]); // ❗️не декодируем!
+                map.put(p[0], p[1]);
             }
         }
         return map;
     }
 
-    private byte[] hmac(String data, byte[] key) {
+    /** HMAC-SHA256 над data с ключом key */
+    private byte[] hmac(byte[] key, byte[] data) {
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(new SecretKeySpec(key, "HmacSHA256"));
-            return mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private byte[] sha256(byte[] input) {
-        try {
-            return MessageDigest.getInstance("SHA-256").digest(input);
+            return mac.doFinal(data);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }

@@ -2,6 +2,7 @@ package kg.bilim_app.mobile_api.service;
 
 import kg.bilim_app.mobile_api.request.RegisterUserRequest;
 import kg.bilim_app.mobile_api.response.UserResponse;
+import kg.bilim_app.mobile_api.security.AuthenticatedUserProvider;
 import kg.bilim_app.ort.entities.AppUser;
 import kg.bilim_app.ort.entities.location.School;
 import kg.bilim_app.ort.repositories.AppUserRepository;
@@ -11,15 +12,24 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final AppUserRepository userRepository;
     private final SchoolRepository schoolRepository;
+    private final AuthenticatedUserProvider userProvider;
 
     @Override
     public UserResponse registerUser(RegisterUserRequest request) {
+        AppUser authenticatedUser = userProvider.getAuthenticatedUser();
+
+        if (!Objects.equals(request.telegramId(), authenticatedUser.getTelegramId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Telegram id mismatch");
+        }
+
         if (userRepository.findByTelegramId(request.telegramId()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "User already exists");
         }

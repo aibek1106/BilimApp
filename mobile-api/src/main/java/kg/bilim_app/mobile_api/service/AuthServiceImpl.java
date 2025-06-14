@@ -38,6 +38,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String authenticate(String initData) {
+        log.info(botToken);
         log.info("Authenticating user {}", initData);
         Map<String, String> data = parse(initData);
         String hash = data.remove("hash");

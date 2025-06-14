@@ -9,13 +9,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
 import kg.bilim_app.mobile_api.security.JwtService;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,25 +30,31 @@ public class AuthServiceImpl implements AuthService {
     @Value("${telegram.bot-token}")
     private String botToken;
 
-    private Mac hmacSha256;
-
-    @PostConstruct
-    void init() throws Exception {
-        hmacSha256 = Mac.getInstance("HmacSHA256");
-    }
-
     @Override
     public String authenticate(String initData) {
-        log.info(botToken);
         log.info("Authenticating user {}", initData);
         Map<String, String> data = parse(initData);
         String hash = data.remove("hash");
 
-        byte[] secret = hmac("WebAppData", botToken.getBytes(StandardCharsets.UTF_8));
+        // 1. sha256(botToken)
+        byte[] botTokenHash;
+        try {
+            botTokenHash = MessageDigest.getInstance("SHA-256")
+                    .digest(botToken.getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            throw new IllegalStateException("SHA-256 error", e);
+        }
+
+        // 2. HMAC("WebAppData", sha256(botToken))
+        byte[] secret = hmac("WebAppData", botTokenHash);
+
+        // 3. Sort and join data
         String dataCheckString = data.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .map(e -> e.getKey() + "=" + e.getValue())
                 .collect(Collectors.joining("\n"));
+
+        // 4. Compute HMAC
         String calculated = bytesToHex(hmac(dataCheckString, secret));
 
         log.info("Expected hash: {}", hash);
@@ -57,10 +63,12 @@ public class AuthServiceImpl implements AuthService {
         if (!calculated.equals(hash)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid init data");
         }
+
         String userJson = data.get("user");
         if (userJson == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User info missing");
         }
+
         try {
             JsonNode node = objectMapper.readTree(userJson);
             long id = node.get("id").asLong();
@@ -85,11 +93,11 @@ public class AuthServiceImpl implements AuthService {
 
     private byte[] hmac(String data, byte[] key) {
         try {
-            SecretKeySpec keySpec = new SecretKeySpec(key, "HmacSHA256");
-            hmacSha256.init(keySpec);
-            return hmacSha256.doFinal(data.getBytes(StandardCharsets.UTF_8));
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(key, "HmacSHA256"));
+            return mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
-            throw new IllegalStateException(e);
+            throw new IllegalStateException("HMAC error", e);
         }
     }
 
@@ -99,15 +107,5 @@ public class AuthServiceImpl implements AuthService {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
-    }
-
-    private static byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i+1), 16));
-        }
-        return data;
     }
 }

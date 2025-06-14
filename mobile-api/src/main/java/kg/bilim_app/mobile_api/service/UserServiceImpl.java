@@ -24,9 +24,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse registerUser(RegisterUserRequest request) {
-        AppUser authenticatedUser = userProvider.getAuthenticatedUser();
-
-        if (!Objects.equals(request.telegramId(), authenticatedUser.getTelegramId())) {
+        if (!Objects.equals(request.telegramId(), userProvider.getAuthenticatedUserTelegramId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Telegram id mismatch");
         }
 

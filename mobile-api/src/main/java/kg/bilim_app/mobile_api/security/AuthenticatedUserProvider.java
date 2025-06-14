@@ -22,4 +22,12 @@ public class AuthenticatedUserProvider {
         return userRepository.findByTelegramId(telegramId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
+
+    public Long getAuthenticatedUserTelegramId() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!(principal instanceof Long telegramId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
+        }
+        return telegramId;
+    }
 }

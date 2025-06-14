@@ -2,7 +2,6 @@ package kg.bilim_app.mobile_api.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,52 +24,42 @@ import java.util.stream.Collectors;
 public class AuthServiceImpl implements AuthService {
 
     private final JwtService jwtService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Value("${telegram.bot-token}")
     private String botToken;
 
     @Override
     public String authenticate(String initData) {
-        log.info("Authenticating user {}", initData);
+
+        // 1. разбираем строку: одно URL-декодирование
         Map<String, String> data = parse(initData);
         String hash = data.remove("hash");
 
-        // 1. sha256(botToken)
-        byte[] botTokenHash;
-        try {
-            botTokenHash = MessageDigest.getInstance("SHA-256")
-                    .digest(botToken.getBytes(StandardCharsets.UTF_8));
-        } catch (Exception e) {
-            throw new IllegalStateException("SHA-256 error", e);
-        }
-
-        // 2. HMAC("WebAppData", sha256(botToken))
+        // 2. secret = HMAC_SHA256("WebAppData", sha256(botToken))
+        byte[] botTokenHash = sha256(botToken.getBytes(StandardCharsets.UTF_8));
         byte[] secret = hmac("WebAppData", botTokenHash);
 
-        // 3. Sort and join data
-        String dataCheckString = data.entrySet().stream()
+        // 3. data_check_string
+        String dcs = data.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .map(e -> e.getKey() + "=" + e.getValue())
                 .collect(Collectors.joining("\n"));
 
-        // 4. Compute HMAC
-        String calculated = bytesToHex(hmac(dataCheckString, secret));
+        // 4. вычисляем hash
+        String calc = bytesToHex(hmac(dcs, secret));
 
-        log.info("Expected hash: {}", hash);
-        log.info("Calculated hash: {}", calculated);
+        log.info("Expected: {}", hash);
+        log.info("Calculated: {}", calc);
 
-        if (!calculated.equals(hash)) {
+        if (!calc.equals(hash)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid init data");
         }
 
-        String userJson = data.get("user");
-        if (userJson == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User info missing");
-        }
-
+        // 5. юзер-json нужно декодировать ещё раз, чтобы распарсить
+        String userJson = URLDecoder.decode(data.get("user"), StandardCharsets.UTF_8);
         try {
-            JsonNode node = objectMapper.readTree(userJson);
+            JsonNode node = mapper.readTree(userJson);
             long id = node.get("id").asLong();
             return jwtService.generateToken(id);
         } catch (Exception e) {
@@ -78,14 +67,14 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
+    /* ---------- util ---------- */
+
     private Map<String, String> parse(String initData) {
         Map<String, String> map = new HashMap<>();
         for (String pair : initData.split("&")) {
             String[] p = pair.split("=", 2);
             if (p.length == 2) {
-                String key = p[0];
-                String value = URLDecoder.decode(URLDecoder.decode(p[1], StandardCharsets.UTF_8), StandardCharsets.UTF_8);
-                map.put(key, value);
+                map.put(p[0], URLDecoder.decode(p[1], StandardCharsets.UTF_8));
             }
         }
         return map;
@@ -97,15 +86,21 @@ public class AuthServiceImpl implements AuthService {
             mac.init(new SecretKeySpec(key, "HmacSHA256"));
             return mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
-            throw new IllegalStateException("HMAC error", e);
+            throw new IllegalStateException(e);
         }
     }
 
-    private static String bytesToHex(byte[] bytes) {
-        StringBuilder sb = new StringBuilder(bytes.length * 2);
-        for (byte b : bytes) {
-            sb.append(String.format("%02x", b));
+    private byte[] sha256(byte[] bytes) {
+        try {
+            return MessageDigest.getInstance("SHA-256").digest(bytes);
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
         }
+    }
+
+    private String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder(bytes.length * 2);
+        for (byte b : bytes) sb.append(String.format("%02x", b));
         return sb.toString();
     }
 }

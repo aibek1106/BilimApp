@@ -22,7 +22,7 @@ jwt:
 logging:
   secret-key: ChangeMe1234567890
 server:
-  port: 8090
+  port: ${SERVER_PORT:8090}
 
 app:
   version: 0.0.1

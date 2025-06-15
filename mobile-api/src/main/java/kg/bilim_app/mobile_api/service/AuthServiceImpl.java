@@ -31,7 +31,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String authenticate(String initData) {
-        log.info("initData: {}", initData);
 
         /* 1. разбираем initData один раз URL-decode, но
               значения оставляем закодированными */
@@ -55,9 +54,6 @@ public class AuthServiceImpl implements AuthService {
         String calculated = bytesToHex(
                 hmac(dcs.getBytes(StandardCharsets.UTF_8), secret));
 
-        log.info("Expected hash: {}", expectedHash);
-        log.info("Calculated hash: {}", calculated);
-        log.info("dataCheckString:\n{}", dcs);
 
         if (!calculated.equals(expectedHash)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid initData");

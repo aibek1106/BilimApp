@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: bilim-app
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bilimdb
+    username: bilimuser
+    password: bilimpass
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+telegram:
+  bot-token: ${BOT_TOKEN:change_me}
+
+jwt:
+  secret: change_me
+  expiration: 3600
+logging:
+  secret-key: ChangeMe1234567890
+server:
+  port: 8090
+
+app:
+  version: 0.0.1

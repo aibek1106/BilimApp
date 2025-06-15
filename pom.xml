@@ -19,7 +19,7 @@
     <modules>
         <module>common</module>
         <module>ort</module>
-        <module>mobile-api</module>
+        <module>app-api</module>
         <module>admin-api</module>
     </modules>
 </project>

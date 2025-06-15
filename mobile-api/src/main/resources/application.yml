@@ -19,6 +19,8 @@ telegram:
 jwt:
   secret: change_me
   expiration: 3600
+logging:
+  secret-key: ChangeMe1234567890
 server:
   port: 8090
 

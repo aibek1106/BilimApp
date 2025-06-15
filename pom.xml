@@ -21,5 +21,6 @@
         <module>ort</module>
         <module>app-api</module>
         <module>admin-api</module>
+        <module>web-api</module>
     </modules>
 </project>
